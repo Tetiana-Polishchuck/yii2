@@ -4,8 +4,9 @@ services:
 
   frontend:
     build: frontend
+    container_name: yii-learning-frontend-1
     ports:
-      - 20080:80
+      - 20083:80
     volumes:
       # Re-use local composer cache via host-volume
       - ~/.composer-docker/cache:/root/.composer/cache:delegated
@@ -14,8 +15,9 @@ services:
 
   backend:
     build: backend
+    container_name: yii-learning-backend-1
     ports:
-      - 21080:80
+      - 21083:80
     volumes:
       # Re-use local composer cache via host-volume
       - ~/.composer-docker/cache:/root/.composer/cache:delegated
@@ -24,15 +26,27 @@ services:
 
   mysql:
     image: mysql:5.7
+    container_name: yii-learning-mysql-1
     environment:
-      - MYSQL_ROOT_PASSWORD=verysecret
-      - MYSQL_DATABASE=yii2advanced
+      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
       - MYSQL_USER=yii2advanced
       - MYSQL_PASSWORD=secret
+    ports:
+      - '3303:3306'
+    volumes:
+      - ./dockerinit:/docker-entrypoint-initdb.d
 
-  #pgsql:
-  #  image: postgres:9.5
-  #  environment:
-  #    - POSTGRES_DB=yii2advanced
-  #    - POSTGRES_USER=yii2advanced
-  #    - POSTGRES_PASSWORD=secret
+  phpmyadmin:
+      image: phpmyadmin
+      container_name: yii-learning-phpmyadmin-1
+      restart: always
+      ports:
+        - 9003:80
+      environment:
+        - PMA_ARBITRARY=1
+        - PMA_HOST=yii-learning-mysql-1
+
+volumes:
+  db:
+    driver: local

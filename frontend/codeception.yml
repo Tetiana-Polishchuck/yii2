@@ -9,7 +9,17 @@ bootstrap: _bootstrap.php
 settings:
     colors: true
     memory_limit: 1024M
+suites:
+    unit:
+    functional:
+#    api:
 modules:
     config:
         Yii2:
             configFile: 'config/codeception-local.php'
+coverage:
+    enabled: true
+    include:
+        - components/*
+        - models/*
+        - controllers/*
