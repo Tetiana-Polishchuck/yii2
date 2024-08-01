@@ -2,10 +2,12 @@
 
 namespace common\models;
 
+use common\components\RuleHelper;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Expression;
 use yii\web\IdentityInterface;
 
 /**
@@ -29,13 +31,17 @@ class User extends ActiveRecord implements IdentityInterface
     const STATUS_INACTIVE = 9;
     const STATUS_ACTIVE = 10;
 
+    public const SCENARIO_CREATE = 'create';
+
+    public string $status_text = '';// 'Active', usage - getStatusTextForSelect()
+    public string $new_password = '';// field for create/update form
 
     /**
      * {@inheritdoc}
      */
-    public static function tableName()
+    public static function tableName():string
     {
-        return '{{%user}}';
+        return 'user';
     }
 
     /**
@@ -53,9 +59,33 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function rules()
     {
+        $model = new self();
+
         return [
+            RuleHelper::required($model, 'username'),
+            RuleHelper::string($model, 'username', 255),
+            RuleHelper::unique($model, 'username'),
+
+            RuleHelper::string($model, 'auth_key', 32),
+
+            ['new_password', 'required', 'on' => self::SCENARIO_CREATE],
+            RuleHelper::string($model, 'new_password', 32),
+
+            RuleHelper::string($model, 'password_reset_token', 255),
+
+            RuleHelper::required($model, 'email'),
+            RuleHelper::string($model, 'email', 255),
+            RuleHelper::email($model, 'email'),
+            RuleHelper::unique($model, 'email'),
+//            ['email', 'checkValidEmail'],
+
+            RuleHelper::integer($model, 'status'),
             ['status', 'default', 'value' => self::STATUS_INACTIVE],
-            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE, self::STATUS_DELETED]],
+            RuleHelper::inRange($model, 'status', [self::STATUS_ACTIVE, self::STATUS_INACTIVE, self::STATUS_DELETED]),
+
+            RuleHelper::string($model, 'verification_token', 255),
+
+            [['created_at', 'updated_at'], 'safe']
         ];
     }
 
@@ -209,5 +239,48 @@ class User extends ActiveRecord implements IdentityInterface
     public function removePasswordResetToken()
     {
         $this->password_reset_token = null;
+    }
+
+    /**
+     * Usage:
+     * User::find()->select(['*', User::getStatusText()])
+     */
+    public static function getStatusTextForSelect(): string
+    {
+        return 'CASE
+                    WHEN `status` = ' . self::STATUS_DELETED . ' THEN "Deleted"
+                    WHEN `status` = ' . self::STATUS_INACTIVE . ' THEN "Inactive"
+                    WHEN `status` = ' . self::STATUS_ACTIVE . ' THEN "Active"
+                    ELSE "Incorrect"
+                END as `status_text`';
+    }
+
+    public function beforeSave($insert): bool
+    {
+        if ($this->isNewRecord) {
+
+            $this->generateAuthKey();
+
+            $this->created_at = new Expression('NOW()');
+
+        } else {
+            $this->updated_at = new Expression('NOW()');
+        }
+
+        if (!empty($this->new_password)) {
+
+            $this->setPassword($this->new_password);
+        }
+
+        return parent::beforeSave($insert);
+    }
+
+    public static function deleteUser(int $id)
+    {
+        $model = self::findOne(['id' => $id]);
+
+        $model->status = self::STATUS_DELETED;
+
+        $model->save(false);
     }
 }

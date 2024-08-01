@@ -1,32 +1,43 @@
 <?php
 
-/** @var yii\web\View $this */
-/** @var yii\bootstrap5\ActiveForm $form */
-/** @var \common\models\LoginForm $model */
+use yii\helpers\Html;
 
-use yii\bootstrap5\ActiveForm;
-use yii\bootstrap5\Html;
-
-$this->title = 'Login';
 ?>
-<div class="site-login">
-    <div class="mt-5 offset-lg-3 col-lg-6">
-        <h1><?= Html::encode($this->title) ?></h1>
+<div class="row justify-content-center">
+    <div class="col-10 col-md-7 col-lg-5 col-xl-4">
+        <div class="card">
+            <div class="card-body login-card-body">
+                <p class="login-box-msg">Sign in to start your session</p>
 
-        <p>Please fill out the following fields to login:</p>
+                <?php $form = \yii\bootstrap4\ActiveForm::begin(['id' => 'login-form']) ?>
 
-        <?php $form = ActiveForm::begin(['id' => 'login-form']); ?>
+                <?php echo $form->field($model, 'username', [
+                    'options' => ['class' => 'form-group has-feedback'],
+                    'inputTemplate' => '{input}',
+                    'template' => '{beginWrapper}{input}{error}{endWrapper}',
+                    'wrapperOptions' => ['class' => 'input-group mb-3']
+                ])
+                    ->label(false)
+                    ->textInput(['placeholder' => $model->getAttributeLabel('username')]) ?>
 
-            <?= $form->field($model, 'username')->textInput(['autofocus' => true]) ?>
+                <?php echo $form->field($model, 'password', [
+                    'options' => ['class' => 'form-group has-feedback'],
+                    'inputTemplate' => '{input}',
+                    'template' => '{beginWrapper}{input}{error}{endWrapper}',
+                    'wrapperOptions' => ['class' => 'input-group mb-3']
+                ])
+                    ->label(false)
+                    ->passwordInput(['placeholder' => $model->getAttributeLabel('password')]) ?>
 
-            <?= $form->field($model, 'password')->passwordInput() ?>
+                <div class="row">
+                    <div class="col-12">
+                        <?php echo Html::submitButton('Sign In', ['class' => 'btn btn-primary btn-block']) ?>
+                    </div>
+                </div>
 
-            <?= $form->field($model, 'rememberMe')->checkbox() ?>
-
-            <div class="form-group">
-                <?= Html::submitButton('Login', ['class' => 'btn btn-primary btn-block', 'name' => 'login-button']) ?>
+                <?php \yii\bootstrap4\ActiveForm::end(); ?>
             </div>
-
-        <?php ActiveForm::end(); ?>
+            <!-- /.login-card-body -->
+        </div>
     </div>
 </div>
