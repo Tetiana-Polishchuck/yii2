@@ -21,38 +21,34 @@ Run container:
 composer docker-run
 ~~~
 
-Run tests:
+
+Запис лога з використанням дефолтного логгера:
 
 ~~~
-composer test
+http://localhost:21083/logger/log
 ~~~
 
-Check coverage:
+Запис лога з вказанням типу логгера:
 
 ~~~
-/console/runtime/output/coverage/index.html
+http://localhost:21083/logger/log-to?type=file
 ~~~
 
-Frontend:
-
 ~~~
-http://localhost:20083/
+http://localhost:21083/logger/log-to?type=email
 ~~~
 
-DB (user - root):
-
 ~~~
-http://localhost:9003/
+http://localhost:21083/logger/log-to?type=db
 ~~~
 
-Backend:
+Запис лога з використанням всіх логгерів:
 
 ~~~
-http://localhost:21083/
+http://localhost:21083/logger/log-to-all
 ~~~
 
-Cron example:
-
-~~~
-docker exec -i yii-learning-frontend-1 php yii_test cron/test
-~~~
+Контроллер \backend\controllers\LoggerController
+Інтерфейс  \common\components\LoggerInterface
+Конфіг  \common\config\params.php
+Моделі \common\models\logger\, \common\models\LogsTable
