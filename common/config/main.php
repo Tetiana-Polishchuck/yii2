@@ -14,6 +14,11 @@ return [
         'cache' => [
             'class' => \yii\caching\FileCache::class,
         ],
+        'mailer' => [
+            'class' => \yii\symfonymailer\Mailer::class,
+            'viewPath' => '@common/mail',
+            'useFileTransport' => true
+        ],
     ],
     'params' => $params,
 ];
